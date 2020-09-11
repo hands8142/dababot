@@ -4,7 +4,7 @@
 
 ## 변경된점
 
-[CHANGELOG](https://github.com/hands8142/dongzun-bot/blob/master/CHANGELOG.md)
+[CHANGELOG](CHANGELOG.md)
 
 ## 도움말 
 
