@@ -2,6 +2,8 @@ import discord
 import datetime
 import os
 import dotenv
+import random
+import pymysql
 from dotenv import load_dotenv
 from discord.ext import commands, tasks
 from itertools import cycle
@@ -10,10 +12,22 @@ load_dotenv()
 
 owner = 683515568137175050
 
+colour = discord.Colour.blue()
+
 status = cycle([f'/도움', 'test중'])
 
 client = commands.Bot(command_prefix="/")
 client.remove_command('help')
+
+mydb = pymysql.connect(
+    host=os.getenv('DB_HOST'),
+    user=os.getenv('DB_USER'),
+    passwd=os.getenv('DB_PASSWD'),
+    database=os.getenv('DB_DATABASE'),
+)
+
+def generateXP():
+    return random.randint(1, 1)
 
 @client.command(name="로드")
 async def load(ctx, extension):
@@ -63,12 +77,59 @@ async def on_ready():
     print("==========")
     guilds_count = len(client.guilds)
     members_count = 0
-
     for guild in client.guilds:
         members_count += len(guild.members)
     print("서버 수: " + str(guilds_count))
     print("멤버 수: " + str(members_count))
     change_status.start()
+
+
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    if not message.guild:
+        return
+    xp = generateXP()
+    cursor = mydb.cursor()
+    cursor.execute("SELECT user_xp, user_level FROM users WHERE guild_id = " + str(message.guild.id) + " AND client_id = " + str(message.author.id))
+    result = cursor.fetchall()
+    if(len(result) == 0):
+        print(message.author.name + "획득 경헙치" + str(xp) + "xp")
+        print("User is not in db... add them")
+        cursor.execute("INSERT INTO users VALUES(" + str(message.guild.id) + "," + str(message.author.id) + "," + str(xp) + ", 1)")
+        mydb.commit()
+    else:
+        newXP = result[0][0] + xp
+        currrentLevel = result[0][1]
+        flag = False
+        howtolevel = int(newXP / 100) + 1
+
+        if howtolevel < 1:
+            howtolevel = 1
+
+        if currrentLevel != howtolevel:
+            flag = True
+        currrentLevel = howtolevel
+
+        print('데베업데이트')
+        cursor.execute("UPDATE users SET user_xp = " + str(newXP) + ", user_level = " + str(currrentLevel) + " WHERE guild_id = " + str(message.guild.id) + "  AND client_id = " + str(message.author.id))
+        mydb.commit()
+
+        if flag:
+            embed = discord.Embed()
+            embed.set_author(name="동준봇")
+            embed.description = message.author.name + "님 레벨업했습니다. 축하합니다 현재레벨: " + str(currrentLevel)
+            await message.channel.send(embed=embed)
+
+    if message.content.startswith("/레벨"):
+        embed = discord.Embed()
+        embed.set_author(name=client.user.name)
+        embed.add_field(name="현재레벨", value=str(currrentLevel), inline=False)
+        embed.add_field(name="현재경험치", value=str(newXP), inline=False)
+        await message.channel.send(embed=embed)
+
+    await client.process_commands(message)
 
 @client.event
 async def on_command_error(ctx, error):

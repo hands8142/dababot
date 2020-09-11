@@ -24,7 +24,7 @@ class util(commands.Cog):
     self.CBSList = "http://m.safekorea.go.kr/idsiSFK/neo/ext/json/disasterDataList/disasterDataList.json"
 
   @commands.command(name="날씨")
-  async def weather(self, ctx, location):
+  async def weather(self, ctx, *, location):
     embed = discord.Embed(
       title="날씨",
       colour=colour
@@ -49,7 +49,6 @@ class util(commands.Cog):
         TodayMorningTemp = soup.find('span', {'class': 'min'}).text
         TodayAfternoonTemp = soup.find('span', {'class': 'max'}).text
         TodayFeelTemp = soup.find('span', {'class': 'sensible'}).text[5:]
-        TodayUV = soup.find('span', {'class': 'indicator'}).text[4:-2] + " " + soup.find('span', {'class': 'indicator'}).text[-2:]
         CheckDust1 = soup.find('div', {'class': 'sub_info'})
         CheckDust2 = CheckDust1.find('div', {'class': 'detail_box'})
         for i in CheckDust2.select('dd'):
@@ -62,7 +61,6 @@ class util(commands.Cog):
         embed.add_field(name="현재온도", value=f"{NowTemp}", inline=True)
         embed.add_field(name="체감온도", value=f"{TodayFeelTemp}", inline=True)
         embed.add_field(name="정보", value=f"{WeatherCast}", inline=True)
-        embed.add_field(name="자외선", value=f"{TodayUV}", inline=True)
         embed.add_field(name="최저온도/최고온도", value=f"{TodayMorningTemp}/{TodayAfternoonTemp}", inline=True)
         embed.add_field(name="미세먼지", value=f"{FineDust}", inline=True)
         embed.add_field(name="초미세먼지", value=f"{UltraFineDust}", inline=True)
