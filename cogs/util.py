@@ -97,6 +97,27 @@ class util(commands.Cog):
     embed.add_field(name="스피드", value=str(pokemon.stats[5].base_stat), inline=True)
     embed.add_field(name="타입", value=", ".join(ty.type.name for ty in pokemon.types), inline=True)
     await ctx.send(embed=embed)
+
+  @commands.command(name="멜론")
+  async def music(self, ctx):
+    embed = discord.Embed(
+      title="노래순위",
+      description="노래순위입니다.",
+      colour=colour
+    )
+    targetSite = 'https://www.melon.com/chart/index.htm'
+    header = {'User-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'}
+    melonrqRetry = rq.get(targetSite, headers=header)
+    melonht = melonrqRetry.text
+    melonsp = bs(melonht, 'html.parser')
+    artists = melonsp.findAll('span', {'class': 'checkEllipsis'})
+    titles = melonsp.findAll('div', {'class': 'ellipsis rank01'})
+    for i in range(len(titles)):
+      artist = artists[i].text.strip()
+      title = titles[i].text.strip()
+      embed.add_field(name="{0:3d}위".format(i + 1), value='{0} - {1}'.format(artist, title), inline=True )
+      embed.timestamp = datetime.datetime.utcnow()
+    await ctx.send(embed=embed)
   
 
 
