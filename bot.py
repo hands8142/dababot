@@ -14,7 +14,7 @@ owner = 683515568137175050
 
 colour = discord.Colour.blue()
 
-status = cycle([f'/도움', 'test중'])
+status = cycle([f'/도움말', '많은 이용 부탁드립니다.'])
 
 client = commands.Bot(command_prefix="/")
 client.remove_command('help')

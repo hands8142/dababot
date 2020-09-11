@@ -42,5 +42,13 @@ class info(commands.Cog):
     embed.timestamp = datetime.datetime.utcnow()
     await ctx.send(embed=embed)
 
+  @commands.command(name="도움", pass_context=True)
+  async def ehdnaakf(self, ctx):
+    embed = discord.Embed(colour=colour)
+    embed.description = "https://dongz.ml/discord/discord-dababot/"
+    embed.timestamp = datetime.datetime.utcnow()
+    await ctx.send(embed=embed)
+
+
 def setup(client):
   client.add_cog(info(client))
