@@ -20,10 +20,14 @@ def duration_to_str(duration):
     days, hours = divmod(hours, 24)
 
     duration = []
-    if days > 0: duration.append(f'{days} 일')
-    if hours > 0: duration.append(f'{hours} 시간')
-    if minutes > 0: duration.append(f'{minutes} 분')
-    if seconds > 0 or len(duration) == 0: duration.append(f'{seconds} 초')
+    if days > 0:
+        duration.append(f'{days} 일')
+    if hours > 0:
+        duration.append(f'{hours} 시간')
+    if minutes > 0:
+        duration.append(f'{minutes} 분')
+    if seconds > 0 or len(duration) == 0:
+        duration.append(f'{seconds} 초')
 
     return ', '.join(duration)
 
@@ -66,7 +70,8 @@ class SongInfo:
         self.info = info
         self.requester = requester
         self.channel = channel
-        self.filename = info.get('_filename', self.ytdl.prepare_filename(self.info))
+        self.filename = info.get(
+            '_filename', self.ytdl.prepare_filename(self.info))
         self.downloaded = asyncio.Event()
         self.local_file = '_filename' in info
 
@@ -102,7 +107,8 @@ class SongInfo:
         loop = loop or asyncio.get_event_loop()
 
         # Get sparse info about our query
-        partial = functools.partial(cls.ytdl.extract_info, request, download=False, process=False)
+        partial = functools.partial(
+            cls.ytdl.extract_info, request, download=False, process=False)
         sparse_info = await loop.run_in_executor(None, partial)
 
         if sparse_info is None:
@@ -121,7 +127,8 @@ class SongInfo:
                 raise MusicError(f'정보를 검색 할 수 없습니다 : {request}')
 
         # Process full video info
-        url = info_to_process.get('url', info_to_process.get('webpage_url', info_to_process.get('id')))
+        url = info_to_process.get('url', info_to_process.get(
+            'webpage_url', info_to_process.get('id')))
         partial = functools.partial(cls.ytdl.extract_info, url, download=False)
         processed_info = await loop.run_in_executor(None, partial)
 
@@ -137,14 +144,16 @@ class SongInfo:
                 try:
                     info = processed_info['entries'].pop(0)
                 except IndexError:
-                    raise MusicError(f'URL에서 정보를 검색 할 수 없습니다 : {info_to_process["url"]}')
+                    raise MusicError(
+                        f'URL에서 정보를 검색 할 수 없습니다 : {info_to_process["url"]}')
 
         return cls(info, requester, channel)
 
     async def download(self, loop):
         """Downloads the song file with ytdl."""
         if not pathlib.Path(self.filename).exists():
-            partial = functools.partial(self.ytdl.extract_info, self.info['webpage_url'], download=True)
+            partial = functools.partial(
+                self.ytdl.extract_info, self.info['webpage_url'], download=True)
             self.info = await loop.run_in_executor(None, partial)
         self.downloaded.set()
 
@@ -260,7 +269,8 @@ class music(commands.Cog):
         return True
 
     async def cog_before_invoke(self, ctx):
-        ctx.music_state = self.music_states.setdefault(ctx.guild.id, GuildMusicState(self.client.loop))
+        ctx.music_state = self.music_states.setdefault(
+            ctx.guild.id, GuildMusicState(self.client.loop))
 
     async def cog_command_error(self, ctx, error):
         if not isinstance(error, (commands.UserInputError, commands.CheckFailure)):

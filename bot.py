@@ -26,8 +26,10 @@ mydb = pymysql.connect(
     database=os.getenv('DB_DATABASE'),
 )
 
+
 def generateXP():
     return random.randint(1, 1)
+
 
 @client.command(name="로드")
 async def load(ctx, extension):
@@ -37,6 +39,7 @@ async def load(ctx, extension):
         client.load_extension(f'cogs.{extension}')
         await ctx.send(f":white_check_mark: {extension}을(를) 로드했습니다!")
 
+
 @client.command(name="언로드")
 async def unload(ctx, extension):
     if not ctx.author.id == int(owner):
@@ -45,12 +48,13 @@ async def unload(ctx, extension):
         client.unload_extension(f'cogs.{extension}')
         await ctx.send(f":white_check_mark: {extension}을(를) 언로드했습니다!")
 
+
 @client.command(name="리로드")
 async def reload_commands(ctx, extension=None):
     if not ctx.author.id == int(owner):
         return
     else:
-        if extension is None: # extension이 None이면 (그냥 !리로드 라고 썼을 때)
+        if extension is None:  # extension이 None이면 (그냥 !리로드 라고 썼을 때)
             for filename in os.listdir("cogs"):
                 if filename.endswith(".py"):
                     client.unload_extension(f"cogs.{filename[:-3]}")
@@ -73,7 +77,7 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('Discord.py 버전 : ' + discord.__version__)
-    print("bot starting..")#봇 시작이라고 뜨게하기
+    print("bot starting..")  # 봇 시작이라고 뜨게하기
     print("==========")
     guilds_count = len(client.guilds)
     members_count = 0
@@ -92,12 +96,14 @@ async def on_message(message):
         return
     xp = generateXP()
     cursor = mydb.cursor()
-    cursor.execute("SELECT user_xp, user_level FROM users WHERE guild_id = " + str(message.guild.id) + " AND client_id = " + str(message.author.id))
+    cursor.execute("SELECT user_xp, user_level FROM users WHERE guild_id = " +
+                   str(message.guild.id) + " AND client_id = " + str(message.author.id))
     result = cursor.fetchall()
     if(len(result) == 0):
         print(message.author.name + "획득 경헙치" + str(xp) + "xp")
         print("User is not in db... add them")
-        cursor.execute("INSERT INTO users VALUES(" + str(message.guild.id) + "," + str(message.author.id) + "," + str(xp) + ", 1)")
+        cursor.execute("INSERT INTO users VALUES(" + str(message.guild.id) +
+                       "," + str(message.author.id) + "," + str(xp) + ", 1)")
         mydb.commit()
     else:
         newXP = result[0][0] + xp
@@ -113,13 +119,15 @@ async def on_message(message):
         currrentLevel = howtolevel
 
         print('데베업데이트')
-        cursor.execute("UPDATE users SET user_xp = " + str(newXP) + ", user_level = " + str(currrentLevel) + " WHERE guild_id = " + str(message.guild.id) + "  AND client_id = " + str(message.author.id))
+        cursor.execute("UPDATE users SET user_xp = " + str(newXP) + ", user_level = " + str(currrentLevel) +
+                       " WHERE guild_id = " + str(message.guild.id) + "  AND client_id = " + str(message.author.id))
         mydb.commit()
 
         if flag:
             embed = discord.Embed()
             embed.set_author(name="동준봇")
-            embed.description = message.author.name + "님 레벨업했습니다. 축하합니다 현재레벨: " + str(currrentLevel)
+            embed.description = message.author.name + \
+                "님 레벨업했습니다. 축하합니다 현재레벨: " + str(currrentLevel)
             await message.channel.send(embed=embed)
 
     if message.content.startswith("/레벨"):
@@ -130,6 +138,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
 
     await client.process_commands(message)
+
 
 @client.event
 async def on_command_error(ctx, error):
@@ -143,10 +152,10 @@ async def on_command_error(ctx, error):
         embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
+
 @tasks.loop(seconds=10)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
-
 
 
 client.run(os.getenv('TOKEN'))
