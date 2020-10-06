@@ -62,7 +62,7 @@ class info(commands.Cog):
         embed.add_field(name="discord.py",
                         value=discord.__version__, inline=True)
         embed.add_field(name="python", value=sys.version[:5], inline=True)
-        embed.add_field(name="bot", value="1.0.1", inline=True)
+        embed.add_field(name="bot", value="1.1.0", inline=True)
         embed.add_field(name="user", value=members_count, inline=True)
         embed.add_field(name="server", value=guilds_count, inline=True)
         embed.add_field(name="creator", value="한동준#7865")
